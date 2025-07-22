@@ -6,15 +6,67 @@ use yii;
 
 class FuncHelper {
 
-    private static $proxy = [
-    
-        ['194.32.240.139:3176', 'user143170:x6ymuf'],
-        ['45.88.211.71:3176', 'user143170:x6ymuf'],
-        ['194.32.240.135:3176', 'user143170:x6ymuf'],
-        ['87.247.140.87:3176', 'user143170:x6ymuf'],
-        ['212.60.6.93:3176', 'user143170:x6ymuf'],
-    ];
+    private static $proxyList = null;
 
+    /**
+     * Загружает и возвращает список прокси из внешнего .txt файла.
+     * Формат файла: user:pass:host:port (каждая прокси на новой строке).
+     * @return array Внутренний формат: [ ['host:port', 'user:pass'], ... ]
+     */
+    private static function getProxyList()
+    {
+        // Если список уже был загружен ранее, просто возвращаем его
+        if (self::$proxyList !== null) {
+            return self::$proxyList;
+        }
+
+        // Используем псевдоним, который вы задали в bootstrap.php
+        $proxyFile = Yii::getAlias('@sharedConfig/proxies.txt');
+
+        if (!file_exists($proxyFile)) {
+            Yii::error('Proxy configuration file not found: ' . $proxyFile, __METHOD__);
+            self::$proxyList = []; // Возвращаем пустой массив, чтобы не было ошибок
+            return self::$proxyList;
+        }
+
+        // Читаем все строки из файла в массив
+        $lines = file($proxyFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        $parsedProxies = [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            // Пропускаем комментарии
+            if (empty($line) || $line[0] === '#') {
+                continue;
+            }
+
+            // Разбиваем строку user:pass:host:port
+            // Этот метод надежно работает, даже если в пароле будут спецсимволы,
+            // но не двоеточия.
+            $parts = explode(':', $line);
+    
+            // Проверяем, что у нас правильное количество частей (минимум 4)
+            if (count($parts) < 4) {
+                Yii::warning("Invalid proxy format in proxies.txt: {$line}", __METHOD__);
+                continue;
+            }
+
+            // Собираем части обратно в нужный нам формат
+            // [ 'host:port', 'user:pass' ]
+
+            $port = array_pop($parts); // Последний элемент - порт
+            $host = array_pop($parts); // Предпоследний - хост
+            $userPass = implode(':', $parts); // Все, что осталось - это user:pass
+
+            $hostPort = $host . ':' . $port;
+
+            $parsedProxies[] = [$hostPort, $userPass];
+        }
+
+        // Сохраняем результат в кэш и возвращаем его
+        self::$proxyList = $parsedProxies;
+        return self::$proxyList;
+    }
     static function curllocal($url, $postdata = '', $cookie = '', $proxy = '', $ref = '') { // для парсинга CarlController
 
         $flag = true;
@@ -76,13 +128,13 @@ class FuncHelper {
     }
 
     static function countproxy() {
-        return (count(self::$proxy) - 1);
+        return (count(self::getProxyList()) - 1);
     }
 
 
 
     static function curlj_new($url, $data = '', $proxy_number = -1, $city = 0) {
-        $proxya = self::$proxy;
+        $proxya = self::getProxyList();
 
         $flag = true;
         //header=false;
