@@ -16,20 +16,20 @@ return [
    // 'bootstrap' => ['log','debug'],
     'controllerNamespace' => 'frontend\controllers',
     'modules' => [
-       /* 'debug' => [
+        'debug' => [
             'class' => 'yii\debug\Module',
             'allowedIPs' => ['5.187.70.511']
-        ],*/
+        ],
         'sitemap' => [
             'class' => 'himiklab\sitemap\Sitemap',
             'models' => [
                 // your models
                // 'common\models\City',
-                'common\models\Route',
+                //'common\models\Route',
                 //'common\models\Station',
             ],
             'enableGzip' => false, // default is false
-            'cacheExpire' => 1, // 1 second. Default is 24 hours
+            'cacheExpire' => 78800, // 1 second. Default is 24 hours
         ]
     ],
     'components' => [
@@ -64,11 +64,11 @@ return [
             'showScriptName' => false,
             'rules' => [
                 ['class' => 'frontend\components\SlugUrlRule'],
-                [
-                    'pattern' => 'sitemap', 
+                /*[
+                    'pattern' => 'sitemap4245764_refresh', 
                     'route' => 'sitemap/default/index', 
                     'suffix' => '.xml'
-                ],
+                ],*/
                 '' => 'site/index',
                 '<controller:\w+>/<action:\w+>/' => '<controller>/<action>',
             ],

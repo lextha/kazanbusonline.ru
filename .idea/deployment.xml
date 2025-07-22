@@ -6,7 +6,14 @@
       <paths name="bus_dop">
         <serverdata>
           <mappings>
-            <mapping deploy="/www/arh-bus.ru" local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="bus_dop_all">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
